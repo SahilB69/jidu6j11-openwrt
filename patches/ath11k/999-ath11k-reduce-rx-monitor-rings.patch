@@ -1,0 +1,52 @@
+From: Sahil Bakshi <sahilbakshi2001@gmail.com>
+Date: Sun, 8 Nov 2026 00:00:00 +0530
+Subject: [PATCH] wifi: ath11k: reduce RX ring sizes for 512 MiB routers
+
+The ath11k RX rings are pre-filled with receive buffers per pdev, which
+adds up to a substantial amount of steady-state memory on 512 MiB
+routers running multiple ath11k radios and can lead to OOM.
+
+Reduce the main RXDMA buffer ring, and shrink the monitor buffer,
+descriptor and status rings, which are rarely exercised outside
+monitor mode. Keep the monitor destination ring at 512, since it is
+the first to overflow during busy monitor captures and holds
+descriptors rather than packet buffers. Leave the RXDMA refill ring at
+its default, as it mostly holds descriptors and offers little saving.
+
+Keep the TX completion ring unchanged. Its size is coupled to the TX
+completion status FIFO and TX buffer IDR, and reducing it is
+unnecessary for this memory optimization.
+
+The changes apply to each ath11k pdev using this driver:
+  RXDMA buffer:          4096 -> 2048
+  RX monitor status:     1024 -> 256
+  RX monitor buffer:     4096 -> 256
+  RX monitor destination:2048 -> 512
+  RX monitor descriptor: 4096 -> 256
+
+Signed-off-by: Sahil Bakshi <sahilbakshi2001@gmail.com>
+---
+ drivers/net/wireless/ath/ath11k/dp.h | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/net/wireless/ath/ath11k/dp.h b/drivers/net/wireless/ath/ath11k/dp.h
+--- a/drivers/net/wireless/ath/ath11k/dp.h
++++ b/drivers/net/wireless/ath/ath11k/dp.h
+@@ -218,10 +218,10 @@
+-#define DP_RXDMA_BUF_RING_SIZE		4096
++#define DP_RXDMA_BUF_RING_SIZE		2048
+ #define DP_RXDMA_REFILL_RING_SIZE	2048
+ #define DP_RXDMA_ERR_DST_RING_SIZE	1024
+-#define DP_RXDMA_MON_STATUS_RING_SIZE	1024
+-#define DP_RXDMA_MONITOR_BUF_RING_SIZE	4096
+-#define DP_RXDMA_MONITOR_DST_RING_SIZE	2048
+-#define DP_RXDMA_MONITOR_DESC_RING_SIZE	4096
++#define DP_RXDMA_MON_STATUS_RING_SIZE	256
++#define DP_RXDMA_MONITOR_BUF_RING_SIZE	256
++#define DP_RXDMA_MONITOR_DST_RING_SIZE	512
++#define DP_RXDMA_MONITOR_DESC_RING_SIZE	256
+ 
+ #define DP_RX_RELEASE_RING_NUM	3
+ 
+-- 
+2.34.1
