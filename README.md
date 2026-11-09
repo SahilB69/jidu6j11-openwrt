@@ -103,6 +103,6 @@ Problems with these builds (packages, patches, the workflow) belong in this repo
 
 ## Credits
 
-Thanks to [Sandeep Sondagar](https://github.com/Sandiep) for his initial work and contributions on this project.
+Thanks to [@Sandiep](https://github.com/Sandiep) for his initial work and contributions on this project.
 
 Built on [OpenWrt](https://openwrt.org/) and the work of everyone behind its ath11k, qualcommbe and iwinfo code. Patches here keep the licenses of the files they modify, mostly GPL-2.0.
