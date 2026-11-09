@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Enable all Wi-Fi radios
+for radio in $(uci -q show wireless | sed -n 's/^wireless\.\([^.=]*\)=wifi-device$/\1/p'); do
+    uci set wireless."$radio".disabled='0'
+done
+
+# Enable all Wi-Fi interfaces
+for iface in $(uci -q show wireless | sed -n 's/^wireless\.\([^.=]*\)=wifi-iface$/\1/p'); do
+    uci set wireless."$iface".disabled='0'
+done
+
+# Commit wireless configuration
+uci commit wireless
+
+exit 0
