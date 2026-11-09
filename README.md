@@ -50,6 +50,8 @@ GitHub also adds a "Source code" archive to every release. It only holds this re
 - **OpenWrt `main` with device support merged in.** The Jio AX6000 isn't in official snapshots yet, so each build merges [PR #26498](https://github.com/openwrt/openwrt/pull/26498) on top of the current `main`. This goes away once the PR is merged upstream.
 - **Custom Wi-Fi board data and driver patches.** Board files in `bdf/` are copied into the `ipq-wifi` package, and ath11k patches in `patches/ath11k/` are added to the mac80211 package. These are changes that can't go upstream or aren't merged yet.
 - **iwinfo [PR #51](https://github.com/openwrt/iwinfo/pull/51).** It's downloaded and applied at build time. It adds the IPQ9574 device ID.
+- **Patched Wi-Fi regulatory domain.** A custom ath11k patch provides a merged FCC regulatory domain, enabling up to 30 dBm transmit power across supported 5 GHz channels and channel widths.
+- **Wi-Fi enabled by default.** A `uci-defaults` script automatically enables all configured Wi-Fi radios and interfaces on first boot.
 - **Extra packages.** USB storage and network support, common filesystems, VPN and traffic-shaping tools, a few LuCI apps and handy command-line tools are built into the image. The current list is in [`config/extra-packages.txt`](config/extra-packages.txt). Kernel modules that aren't in the image can't be installed later, because there is no package feed for these builds yet.
 
 ## How the builds work
