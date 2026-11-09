@@ -1,0 +1,87 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sandeep Sondagar <sandeepsondagar@gmail.com>
+Date: Sun, 06 Sep 2026 10:00:00 +0530
+Subject: [PATCH] wifi: ath11k: present the  FCC/30 dBm regdomain on JIDU6J11
+
+The stock reference build presents a self-managed "PA: DFS-FCC" domain
+with four merged rules at 30 dBm and no DFS/NO-IR/AUTO-BW flags:
+
+	(2402 - 2482 @ 40), (N/A, 30), (N/A)
+	(5150 - 5350 @ 160), (N/A, 30), (N/A)
+	(5470 - 5730 @ 160), (N/A, 30), (N/A)
+	(5735 - 5835 @ 80), (N/A, 30), (N/A)
+
+This build instead presents the firmware-driven default domain, which
+is split with the 5 GHz DFS bands capped at 24 dBm. Present the fixed
+reference domain on the QCN9074 (PCI) and IPQ9574 (AHB) radios
+regardless of the firmware chan-list event content so the host side
+matches the reference build.
+
+The lower 5 GHz band is deliberately widened to 160 MHz. The reference
+build reports it as @ 80, and that cap is not cosmetic: cfg80211 turns
+max_bw < 160 into IEEE80211_CHAN_NO_160MHZ on CH36-CH64 via
+reg_max_bw_flags(), and a HE160 AP on those channels then never comes
+up, failing with
+
+	nl80211: kernel reports: (extension) channel is disabled
+
+CH36 as the lower-edge primary of a 160 MHz block centers on channel
+50 (5250 MHz) and spans 5170-5330 MHz, which lies inside 5150-5350, so
+cfg80211_does_bw_fit_range() is satisfied and the band cap was the only
+blocker. The hardware and firmware already advertise 160 MHz on Band 2.
+
+---
+ drivers/net/wireless/ath/ath11k/reg.c | 31 ++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
+--- a/drivers/net/wireless/ath/ath11k/reg.c
++++ b/drivers/net/wireless/ath/ath11k/reg.c
+@@ -29,6 +29,27 @@
+ 	}
+ };
+ 
++/* Fixed regdomain presented on the reference JIDU6J11 build: a merged
++ * FCC domain with all bands at 30 dBm and no DFS/NO-IR/AUTO-BW flags.
++ * The firmware chan-list event on this platform instead carries split
++ * world-like rules capped at 24 dBm on the 5 GHz DFS bands.
++ *
++ * The lower 5 GHz band is widened to 160 MHz on purpose: the reference
++ * build caps it at 80, which makes cfg80211 flag CH36-CH64
++ * NO_160MHZ and leaves a HE160 AP there permanently down.
++ */
++static const struct ieee80211_regdomain ath11k_refeq_regd = {
++	.n_reg_rules = 4,
++	.alpha2 = "PA",
++	.dfs_region = NL80211_DFS_FCC,
++	.reg_rules = {
++		REG_RULE(2402, 2482, 40, 0, 30, 0),
++		REG_RULE(5150, 5350, 160, 0, 30, 0),
++		REG_RULE(5470, 5730, 160, 0, 30, 0),
++		REG_RULE(5735, 5835, 80, 0, 30, 0),
++	}
++};
++
+ static bool ath11k_regdom_changes(struct ath11k *ar, char *alpha2)
+ {
+ 	const struct ieee80211_regdomain *regd;
+@@ -246,8 +267,16 @@
+ 
+ 	spin_lock_bh(&ab->base_lock);
+ 
+-	/* Prefer the latest regd update over default if it's available */
+-	if (ab->new_regd[pdev_id]) {
++	/* Present the fixed reference domain on the JIDU6J11 radios
++	 * (QCN9074 PCI + IPQ9574 AHB) regardless of the FW event so the
++	 * host side matches the reference build (merged FCC rules at
++	 * 30 dBm on every band).
++	 */
++	if (ab->hw_rev == ATH11K_HW_QCN9074_HW10 ||
++	    ab->hw_rev == ATH11K_HW_IPQ9574) {
++		regd = (struct ieee80211_regdomain *)&ath11k_refeq_regd;
++	} else if (ab->new_regd[pdev_id]) {
++		/* Prefer the latest regd update over default if it's available */
+ 		regd = ab->new_regd[pdev_id];
+ 	} else {
+ 		/* Apply the regd received during init through
+-- 
+2.43.0
