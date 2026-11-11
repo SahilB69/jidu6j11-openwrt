@@ -28,7 +28,9 @@ Unofficial OpenWrt snapshot builds for the Jio Router AX6000 (JIDU6J11). Not aff
 EOF
 
 for sku in $SKUS; do
-  f="$(find "$OUT" -maxdepth 1 -name "*-${sku}-*sysupgrade*" | head -n1)"
+  # Image names use the jidu<sku> form, e.g.
+  # openwrt-qualcommbe-ipq95xx-jiorouter_ax6000-jidu6111-squashfs-sysupgrade.bin
+  f="$(find "$OUT" -maxdepth 1 -name "*-jidu${sku}-*sysupgrade*" | head -n1)"
   if [ -n "$f" ]; then
     size="$(du -h "$f" | cut -f1)"
     echo "| $sku | ${UART[$sku]:-?} | \`$(basename "$f")\` | $size |"
