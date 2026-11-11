@@ -1,16 +1,29 @@
 #!/bin/sh
 
-# Enable all Wi-Fi radios
+# Enable every radio and interface that UCI knows about.
+enabled=0
 for radio in $(uci -q show wireless | sed -n 's/^wireless\.\([^.=]*\)=wifi-device$/\1/p'); do
-    uci set wireless."$radio".disabled='0'
+    uci set wireless."$radio".disabled='0' || { echo "failed to set $radio" >&2; exit 1; }
+    enabled=$((enabled + 1))
 done
 
-# Enable all Wi-Fi interfaces
+if [ "$enabled" -eq 0 ]; then
+    echo "no wifi-device sections found; run 'wifi config' first" >&2
+    exit 1
+fi
+
 for iface in $(uci -q show wireless | sed -n 's/^wireless\.\([^.=]*\)=wifi-iface$/\1/p'); do
-    uci set wireless."$iface".disabled='0'
+    uci set wireless."$iface".disabled='0' || { echo "failed to set $iface" >&2; exit 1; }
 done
 
-# Commit wireless configuration
-uci commit wireless
+# Compare radios the kernel sees with radios UCI knows about
+kernel_radios=$(ls /sys/class/ieee80211/ 2>/dev/null | wc -l)
+uci_radios=$(uci -q show wireless | grep -c '=wifi-device$')
+if [ "$kernel_radios" -gt "$uci_radios" ]; then
+    echo "warning: $kernel_radios radios in kernel, $uci_radios in UCI" >&2
+fi
+
+uci commit wireless || { echo "uci commit failed" >&2; exit 1; }
+wifi reload
 
 exit 0
