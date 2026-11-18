@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Enable ps3eye streaming service on first boot
+/etc/init.d/ps3eye enable
+
+exit 0

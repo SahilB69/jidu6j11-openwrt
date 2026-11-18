@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# Hotplug trigger for Sony PlayStation Eye camera (USB ID 1415:2000)
+
+case "$ACTION" in
+	add)
+		case "$PRODUCT" in
+			1415/2000/*|1415/2000)
+				# If streamer is already running cleanly, avoid duplicate starts
+				if /etc/init.d/ps3eye running 2>/dev/null; then
+					logger -t ps3eye-hotplug "PS3 Eye already running. Ignoring redundant add event."
+					exit 0
+				fi
+
+				logger -t ps3eye-hotplug "PS3 Eye camera attached ($PRODUCT). Waiting for /dev/video0..."
+				for i in 1 2 3 4 5; do
+					if [ -c /dev/video0 ]; then
+						logger -t ps3eye-hotplug "/dev/video0 ready. Starting ps3eye streaming service."
+						/etc/init.d/ps3eye start
+						exit 0
+					fi
+					sleep 1
+				done
+				logger -t ps3eye-hotplug "Warning: /dev/video0 did not appear within 5 seconds."
+				;;
+		esac
+		;;
+	remove)
+		case "$PRODUCT" in
+			1415/2000/*|1415/2000)
+				logger -t ps3eye-hotplug "PS3 Eye camera detached ($PRODUCT). Stopping ps3eye service."
+				if /etc/init.d/ps3eye running 2>/dev/null; then
+					/etc/init.d/ps3eye stop
+				fi
+				;;
+		esac
+		;;
+esac

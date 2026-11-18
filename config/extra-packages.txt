@@ -39,3 +39,10 @@ ethtool
 ip-full
 zram-swap
 
+# --- PS3 Eye Webcam & Video Streaming ---
+kmod-video-core
+kmod-video-gspca-core
+kmod-video-gspca-ov534
+ustreamer
+v4l-utils
+
