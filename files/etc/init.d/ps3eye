@@ -15,7 +15,7 @@ start_service() {
 	config_get host settings host '0.0.0.0'
 	config_get port settings port '8080'
 	config_get resolution settings resolution '640x480'
-	config_get fps settings fps '30'
+	config_get fps settings fps '15'
 	config_get quality settings quality '80'
 	config_get workers settings workers '2'
 	config_get format settings format 'YUYV'
