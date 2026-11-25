@@ -1,0 +1,20 @@
+#!/bin/sh /etc/rc.common
+
+START=05
+
+boot() {
+	[ -e /sys/module/usbcore/parameters/quirks ] && echo '1415:2000:kgr' > /sys/module/usbcore/parameters/quirks
+	[ -e /sys/module/usbcore/parameters/autosuspend ] && echo -1 > /sys/module/usbcore/parameters/autosuspend
+	[ -e /sys/module/usbcore/parameters/old_scheme_first ] && echo Y > /sys/module/usbcore/parameters/old_scheme_first
+
+	# Re-power USB VBUS so devices re-enumerate with the active quirks on cold boot
+	[ -d /sys/class/gpio/gpio576 ] || echo 576 > /sys/class/gpio/export 2>/dev/null
+	echo out > /sys/class/gpio/gpio576/direction 2>/dev/null
+	echo 0 > /sys/class/gpio/gpio576/value 2>/dev/null
+	sleep 1
+	echo 1 > /sys/class/gpio/gpio576/value 2>/dev/null
+}
+
+start() {
+	boot
+}

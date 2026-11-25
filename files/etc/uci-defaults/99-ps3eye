@@ -1,6 +1,7 @@
 #!/bin/sh
 
-# Enable ps3eye streaming service on first boot
+# Enable ps3eye streaming and USB quirks services on first boot
 /etc/init.d/ps3eye enable
+[ -x /etc/init.d/usbquirks ] && /etc/init.d/usbquirks enable
 
 exit 0
