@@ -24,6 +24,7 @@ kmod-usb-net-cdc-ether
 kmod-usb-net-rndis
 kmod-usb-net-rtl8152
 kmod-usb-net-asix-ax88179
+kmod-usb-net-ipheth
 
 # --- Network kmods ---
 kmod-wireguard
