@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# FEAT-1: sqm-scripts ships one example queue, 'eth1', with enabled '0'.
+# This board has no eth1; its WAN port is the netdev 'wan'. Point the
+# untouched example at 'wan' so the LuCI SQM page starts from something
+# usable, and keep it disabled: shaping only starts when the user enables
+# it and sets real upload/download rates.
+#
+# uci-defaults also run after a sysupgrade that keeps settings, so only
+# touch the pristine example. A queue the user has edited is left alone.
+
+[ "$(uci -q get sqm.eth1)" = "queue" ] || exit 0
+[ "$(uci -q get sqm.eth1.interface)" = "eth1" ] || exit 0
+
+uci -q set sqm.eth1.interface='wan'
+uci -q set sqm.eth1.enabled='0'
+uci -q commit sqm
+
+exit 0
