@@ -52,6 +52,14 @@ if [ -d "$ROOT/bdf" ]; then
 fi
 echo "::endgroup::"
 
+echo "::group::Copy raw files into the tree"
+# tree/ mirrors the OpenWrt root: tree/target/linux/... is copied to target/linux/...
+# Use it for plain kernel patch files, which are applied by the kernel build with patch(1).
+if [ -d "$ROOT/tree" ]; then
+  cp -av "$ROOT/tree/." .
+fi
+echo "::endgroup::"
+
 echo "::group::Copy ath11k patches"
 # patches/ath11k/*.patch go into the mac80211 package's ath11k patch dir
 mkdir -p package/kernel/mac80211/patches/ath11k
