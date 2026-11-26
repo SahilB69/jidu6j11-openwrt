@@ -31,6 +31,14 @@ kmod-tun
 kmod-zram
 kmod-nat46
 
+# --- IPv4/IPv6 transition (464XLAT) ---
+464xlat
+luci-proto-ipv6
+
+# --- Web UI and certificates ---
+luci
+ca-bundle
+
 # --- SQM / CAKE (FEAT-1, repo issue #1). Installed but DISABLED by default:
 # sqm-scripts ships its only queue with enabled '0'; see files/etc/uci-defaults/80-sqm-wan.
 kmod-sched-core             # tc qdisc/classifier/action core (ingress qdisc, u32, act_mirred)
