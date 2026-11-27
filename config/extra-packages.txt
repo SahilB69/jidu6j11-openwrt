@@ -65,4 +65,5 @@ iperf3
 ethtool
 ip-full
 zram-swap
-tcpdump-mini                # packet capture for WAN/DHCP/PPPoE/Wi-Fi debugging when no feed is reachable
+tcpdump-mini
+usteer
