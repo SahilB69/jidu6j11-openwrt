@@ -17,7 +17,7 @@ env:
   OPENWRT_REPO: https://github.com/openwrt/openwrt.git
   OPENWRT_BRANCH: main
   PR_NUMBER: "26498" # upstream PR with the device support; set to "" once merged
-  IWINFO_PRS: "51" # open openwrt/iwinfo PRs to patch in (space-separated); set to "" once merged
+  IWINFO_PRS: "" # open openwrt/iwinfo PRs to patch in (space-separated); set to "" once merged
   TARGET: qualcommbe
   SUBTARGET: ipq95xx
   SKUS: "6111 6411 6611 6711 6811 6911"
